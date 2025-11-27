@@ -27,10 +27,10 @@
     "build": "rimraf dist && tsc",
     "start": "node dist/server.js",
     "lint": "eslint src/**/*.ts",
-    "db:generate": "drizzle-kit generate:mysql",
-    "db:push": "drizzle-kit push:mysql",
-    "db:studio": "drizzle-kit studio",
-    "db:drop": "drizzle-kit drop"
+    "db:generate": "npx drizzle-kit generate --config=drizzle.config.ts",
+    "db:push": "npx drizzle-kit push --config=drizzle.config.ts",
+    "db:studio": "npx drizzle-kit studio --config=drizzle.config.ts",
+    "db:drop": "npx drizzle-kit drop --config=drizzle.config.ts"
   },
   "dependencies": {
     "argon2": "^0.44.0",

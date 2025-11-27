@@ -3,7 +3,7 @@ import {
   createTransaction,
   getTransactions,
 } from "../controllers/transaction.controller";
-import { protect } from "../middleware/auth.middleware";
+import { protect } from "../middlewares/auth.middleware";
 
 const router = Router();
 

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { db } from "../db";
-import { transactions, transactionItems } from "../db/schema";
+import { transactions, transactionItems, categories } from "../db/schema";
 import { transactionSchema } from "../utils/validation";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 
 export const createTransaction = async (
   req: Request,
@@ -58,23 +58,54 @@ export const getTransactions = async (
   try {
     const userId = req.user!.id;
 
-    const data = await db.query.transactions.findMany({
-      where: eq(transactions.userId, userId),
-      orderBy: [desc(transactions.transactionDate)],
-      limit: 20,
-      with: {
-        items: {
-          with: {
-            category: true,
-          },
+    const userTransactions = await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.userId, userId))
+      .orderBy(desc(transactions.transactionDate))
+      .limit(20);
+
+    if (userTransactions.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        results: 0,
+        data: [],
+      });
+    }
+
+    const transactionIds = userTransactions.map((tx) => tx.id);
+
+    const itemsData = await db
+      .select({
+        itemId: transactionItems.id,
+        transactionId: transactionItems.transactionId,
+        name: transactionItems.name,
+        price: transactionItems.price,
+        qty: transactionItems.qty,
+        category: {
+          id: categories.id,
+          name: categories.name,
+          icon: categories.icon,
+          color: categories.color,
         },
-      },
+      })
+      .from(transactionItems)
+      .leftJoin(categories, eq(transactionItems.categoryId, categories.id))
+      .where(inArray(transactionItems.transactionId, transactionIds));
+
+    const finalData = userTransactions.map((tx) => {
+      const myItems = itemsData.filter((item) => item.transactionId === tx.id);
+
+      return {
+        ...tx,
+        items: myItems,
+      };
     });
 
     res.status(200).json({
-      status: "succes",
-      results: data.length,
-      data,
+      status: "success",
+      results: finalData.length,
+      data: finalData,
     });
   } catch (error) {
     next(error);
