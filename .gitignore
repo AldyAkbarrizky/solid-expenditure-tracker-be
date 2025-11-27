@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment Variables (CRITICAL SECURITY)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build Output
+dist/
+build/
+
+# Drizzle ORM
+# Kita commit file SQL migrasi, tapi abaikan meta folder yang local-specific
+drizzle/meta/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# IDE Configs
+.vscode/
+.idea/
+*.swp

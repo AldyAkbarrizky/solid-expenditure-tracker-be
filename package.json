@@ -1,0 +1,62 @@
+{
+  "name": "solid-expenditure-tracker-be",
+  "version": "0.1.0-alpha",
+  "description": "Aplikasi Backend untuk Solid Expenditure Tracker",
+  "keywords": [
+    "nodejs",
+    "mysql",
+    "drizzle",
+    "tracker",
+    "expenditure",
+    "express"
+  ],
+  "homepage": "https://github.com/AldyAkbarrizky/solid-expenditure-tracker-be#readme",
+  "bugs": {
+    "url": "https://github.com/AldyAkbarrizky/solid-expenditure-tracker-be/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AldyAkbarrizky/solid-expenditure-tracker-be.git"
+  },
+  "license": "ISC",
+  "author": "Aldy Akbarrizky",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "rimraf dist && tsc",
+    "start": "node dist/server.js",
+    "lint": "eslint src/**/*.ts",
+    "db:generate": "drizzle-kit generate:mysql",
+    "db:push": "drizzle-kit push:mysql",
+    "db:studio": "drizzle-kit studio",
+    "db:drop": "drizzle-kit drop"
+  },
+  "dependencies": {
+    "argon2": "^0.44.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.44.7",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "mysql2": "^3.15.3",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/hpp": "^0.2.7",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.10.1",
+    "drizzle-kit": "^0.31.7",
+    "rimraf": "^6.1.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
