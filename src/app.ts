@@ -27,10 +27,8 @@ const createApp = (): Application => {
       origin: string | undefined,
       callback: (error: Error | null, allow?: boolean) => void,
     ) => {
-      // A. Allow requests tanpa origin (misal mobile, curl request, dan juga postman)
       if (!origin) return callback(null, true);
 
-      // Jaga jaga siapa tau nanti ngebuat FE untuk admin lokal
       const allowedOrigins = [
         "http://localhost:3000",
         "https://your-production-frontend.vercel.app",
@@ -85,4 +83,7 @@ const createApp = (): Application => {
   return app;
 };
 
-export default createApp;
+const app = createApp();
+
+export { createApp };
+export default app;

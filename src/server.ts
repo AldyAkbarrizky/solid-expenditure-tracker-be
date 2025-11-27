@@ -1,8 +1,7 @@
-import createApp from "./app";
+import app from "./app";
 
 console.log("Booting Application...");
 const port = process.env.PORT || 8000;
-const app = createApp();
 
 const start = async () => {
   app.listen(port, () => {
