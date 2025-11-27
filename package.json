@@ -1,6 +1,6 @@
 {
   "name": "solid-expenditure-tracker-be",
-  "version": "0.1.0-alpha",
+  "version": "0.2.0",
   "description": "Aplikasi Backend untuk Solid Expenditure Tracker",
   "keywords": [
     "nodejs",
@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "argon2": "^0.44.0",
+    "cloudinary": "^2.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -53,6 +54,7 @@
     "@types/hpp": "^0.2.7",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
     "@types/node": "^24.10.1",
     "drizzle-kit": "^0.31.7",
     "rimraf": "^6.1.2",

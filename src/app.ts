@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
 import transactionRoutes from "./routes/transaction.routes";
 import categoryRoutes from "./routes/category.routes";
+import statsRoutes from "./routes/stats.routes";
 
 const createApp = (): Application => {
   const app = express();
@@ -63,6 +64,7 @@ const createApp = (): Application => {
   app.use("/api/auth", authRoutes);
   app.use("/api/transactions", transactionRoutes);
   app.use("/api/categories", categoryRoutes);
+  app.use("/api/stats", statsRoutes);
 
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     console.error(err);
