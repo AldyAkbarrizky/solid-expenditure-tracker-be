@@ -8,6 +8,11 @@ import authRoutes from "./routes/auth.routes";
 import transactionRoutes from "./routes/transaction.routes";
 import categoryRoutes from "./routes/category.routes";
 import statsRoutes from "./routes/stats.routes";
+import familyRoutes from "./routes/family.routes";
+
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger";
+import { config } from "./config";
 
 const createApp = (): Application => {
   const app = express();
@@ -18,6 +23,8 @@ const createApp = (): Application => {
   app.use(express.json({ limit: "10kb" }));
   app.use(express.urlencoded({ extended: true }));
 
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
   if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
   }
@@ -27,19 +34,15 @@ const createApp = (): Application => {
       origin: string | undefined,
       callback: (error: Error | null, allow?: boolean) => void,
     ) => {
+
       if (!origin) return callback(null, true);
 
-      const allowedOrigins = [
-        "http://localhost:3000",
-        "https://your-production-frontend.vercel.app",
-      ];
-
-      const isLocalDev =
-        origin.startsWith("http://192.168.") ||
-        origin.startsWith("http://10.0.");
-      const isAllowedOrigin = allowedOrigins.includes(origin);
-
-      if (isLocalDev || isAllowedOrigin) {
+      if (config.env === "development") {
+        return callback(null, true);
+      }
+      
+      const allowedOrigins = config.cors.allowedOrigins;
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
@@ -63,6 +66,7 @@ const createApp = (): Application => {
   app.use("/api/transactions", transactionRoutes);
   app.use("/api/categories", categoryRoutes);
   app.use("/api/stats", statsRoutes);
+  app.use("/api/families", familyRoutes);
 
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     console.error(err);

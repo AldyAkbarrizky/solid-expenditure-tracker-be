@@ -1,16 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import argon2 from "argon2";
-import jwt from "jsonwebtoken";
-import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { users } from "../db/schema";
+import { AuthService } from "../services/auth.service";
+import { UserService } from "../services/user.service";
 import { registerSchema, loginSchema } from "../utils/validation";
+import { z } from "zod";
 
-const signToken = (id: number) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET as string, {
-    expiresIn: "90d",
-  });
-};
+const authService = new AuthService();
+const userService = new UserService();
 
 export const register = async (
   req: Request,
@@ -19,43 +14,11 @@ export const register = async (
 ) => {
   try {
     const { body } = registerSchema.parse(req);
-    const { name, email, password } = body;
-
-    const existingUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email));
-
-    if (existingUser.length > 0) {
-      return res.status(400).json({
-        status: "fail",
-        message: "Email is already in use",
-      });
-    }
-
-    const passwordHash = await argon2.hash(password);
-
-    const [newUser] = await db
-      .insert(users)
-      .values({
-        name,
-        email,
-        password: passwordHash,
-      })
-      .$returningId();
-
-    const token = signToken(newUser.id);
+    const result = await authService.register(body);
 
     res.status(201).json({
       status: "success",
-      token,
-      data: {
-        user: {
-          id: newUser.id,
-          name,
-          email,
-        },
-      },
+      ...result,
     });
   } catch (error) {
     next(error);
@@ -69,41 +32,53 @@ export const login = async (
 ) => {
   try {
     const { body } = loginSchema.parse(req);
-    const { email, password } = body;
-
-    const userResult = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email));
-
-    if (userResult.length === 0) {
-      return res.status(401).json({
-        status: "fail",
-        message: "Incorrect email or password",
-      });
-    }
-
-    const user = userResult[0];
-
-    const validPassword = await argon2.verify(user.password, password);
-
-    if (!validPassword) {
-      return res.status(401).json({
-        status: "fail",
-        message: "Incorrect email or password",
-      });
-    }
-
-    const token = signToken(user.id);
-
-    const { password: _, ...userData } = user;
+    const result = await authService.login(body);
 
     res.status(200).json({
       status: "success",
-      token,
-      data: {
-        user: userData,
-      },
+      ...result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const schema = z.object({
+      name: z.string().min(3).optional(),
+    });
+    const { name } = schema.parse(req.body);
+
+    const updatedUser = await userService.updateProfile(
+      req.user!.id,
+      { name },
+      req.file,
+    );
+
+    res.status(200).json({
+      status: "success",
+      data: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = await userService.getUserById(req.user!.id);
+    res.status(200).json({
+      status: "success",
+      data: user,
     });
   } catch (error) {
     next(error);

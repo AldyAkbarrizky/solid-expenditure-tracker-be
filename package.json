@@ -1,6 +1,6 @@
 {
   "name": "solid-expenditure-tracker-be",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Aplikasi Backend untuk Solid Expenditure Tracker",
   "keywords": [
     "nodejs",
@@ -30,7 +30,9 @@
     "db:generate": "npx drizzle-kit generate --config=drizzle.config.ts",
     "db:push": "npx drizzle-kit push --config=drizzle.config.ts",
     "db:studio": "npx drizzle-kit studio --config=drizzle.config.ts",
-    "db:drop": "npx drizzle-kit drop --config=drizzle.config.ts"
+    "db:drop": "npx drizzle-kit drop --config=drizzle.config.ts",
+    "db:migrate": "tsx migrate.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "argon2": "^0.44.0",
@@ -46,6 +48,9 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "mysql2": "^3.15.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^13.0.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -57,9 +62,12 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.10.1",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "drizzle-kit": "^0.31.7",
     "rimraf": "^6.1.2",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
   }
 }

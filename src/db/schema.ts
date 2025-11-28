@@ -11,11 +11,27 @@ import {
 } from "drizzle-orm/mysql-core";
 import { relations, sql } from "drizzle-orm";
 
+export const families = mysqlTable("families", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  adminId: int("admin_id").notNull(),
+  avatarUrl: text("avatar_url"),
+  inviteCode: varchar("invite_code", { length: 10 }).notNull().unique(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updated_at").default(
+    sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`,
+  ),
+});
+
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
+  avatarUrl: text("avatar_url"),
+  familyId: int("family_id").references(() => families.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: timestamp("updated_at").default(
     sql`CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`,
@@ -72,8 +88,20 @@ export const transactionItems = mysqlTable("transaction_items", {
   qty: int("qty").default(1),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const familiesRelations = relations(families, ({ one, many }) => ({
+  admin: one(users, {
+    fields: [families.adminId],
+    references: [users.id],
+  }),
+  members: many(users),
+}));
+
+export const usersRelations = relations(users, ({ one, many }) => ({
   transactions: many(transactions),
+  family: one(families, {
+    fields: [users.familyId],
+    references: [families.id],
+  }),
 }));
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
@@ -106,6 +134,7 @@ export const transactionItemsRelations = relations(
 );
 
 export type User = typeof users.$inferSelect;
+export type Family = typeof families.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type TransactionItem = typeof transactionItems.$inferSelect;

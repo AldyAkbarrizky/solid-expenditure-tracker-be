@@ -61,14 +61,13 @@ CLOUDINARY_CLOUD_NAME=nama_cloud
 CLOUDINARY_API_KEY=123456...
 CLOUDINARY_API_SECRET=abcdef...
 ```
-
 ### 4. Setup Database
 ```bash
 # Push schema ke DB
 npm run db:push
 
-# Isi kategori awal
-npx tsx src/db/seed.ts
+# Isi kategori awal (jika ada seed script)
+# npx tsx src/db/seed.ts
 ```
 
 ### 5. Jalankan Server
@@ -83,18 +82,18 @@ npm run dev
 ### Auth
 * `POST /api/auth/register` - Daftar user.
 * `POST /api/auth/login` - Login.
+* `PUT /api/auth/profile` - Update profile & avatar.
 
-### Dashboard & Stats (New)
-* `GET /api/stats/dashboard` - Data grafik (Pie chart kategori, Line chart harian).
-* `GET /api/transactions/recent` - 5 Transaksi terakhir (Preview).
+### Family (New)
+* `POST /api/families` - Buat keluarga baru.
+* `POST /api/families/join` - Gabung keluarga via kode.
+* `GET /api/families/members` - List anggota keluarga.
 
 ### Transactions
 * `POST /api/transactions` - Input baru (mendukung upload `image`).
 * `GET /api/transactions` - History lengkap.
-    * *Query Params:* `?startDate=2025-10-01&endDate=2025-10-31&limit=50`
-* `POST /api/scan` - OCR Struk belanja.
+    * *Query Params:* `?startDate=...&endDate=...&limit=...&family=true`
 
----
 
 ## ☁️ Deployment (Vercel)
 

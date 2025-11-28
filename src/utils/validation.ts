@@ -43,3 +43,7 @@ export const categorySchema = z.object({
     isDefault: z.boolean().optional(),
   }),
 });
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type TransactionInput = z.infer<typeof transactionSchema>;
