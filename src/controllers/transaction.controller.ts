@@ -58,6 +58,8 @@ export const getTransactions = async (
       endDate: endDate as string,
       limit: limit ? Number(limit) : undefined,
       familyId: family === "true" ? req.user!.familyId || undefined : undefined,
+      itemName: req.query.itemName as string,
+      categoryId: req.query.categoryId ? Number(req.query.categoryId) : undefined,
     });
 
     res.status(200).json({

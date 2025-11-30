@@ -82,7 +82,7 @@ export const getDashboardStats = async (
         ),
       )
       .groupBy(sql`DATE_FORMAT(${transactions.transactionDate}, '%Y-%m-%d')`)
-      .orderBy(sql`date`);
+      .orderBy(sql`DATE_FORMAT(${transactions.transactionDate}, '%Y-%m-%d')`);
 
     res.status(200).json({
       status: "success",

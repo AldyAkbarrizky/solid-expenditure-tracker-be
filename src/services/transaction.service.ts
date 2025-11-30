@@ -1,4 +1,4 @@
-import { eq, desc, and, gte, lte, inArray } from "drizzle-orm";
+import { eq, desc, and, gte, lte, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import { transactions, transactionItems, categories, users } from "../db/schema";
 import { uploadToCloudinary } from "../utils/cloudinary";
@@ -52,9 +52,11 @@ export class TransactionService {
       endDate?: string;
       limit?: number;
       familyId?: number;
+      itemName?: string;
+      categoryId?: number;
     },
   ) {
-    const { startDate, endDate, limit, familyId } = query;
+    const { startDate, endDate, limit, familyId, itemName, categoryId } = query;
     const conditions = [];
 
     if (familyId) {
@@ -78,6 +80,28 @@ export class TransactionService {
       const end = new Date(endDate as string);
       end.setHours(23, 59, 59, 999);
       conditions.push(lte(transactions.transactionDate, end));
+    }
+
+    if (itemName || categoryId) {
+      const itemConditions = [];
+      if (itemName) {
+        itemConditions.push(sql`${transactionItems.name} LIKE ${`%${itemName}%`}`);
+      }
+      if (categoryId) {
+        itemConditions.push(eq(transactionItems.categoryId, Number(categoryId)));
+      }
+
+      const matchingTxIds = await db
+        .selectDistinct({ id: transactionItems.transactionId })
+        .from(transactionItems)
+        .where(and(...itemConditions));
+
+      if (matchingTxIds.length === 0) {
+        return { results: 0, data: [] };
+      }
+
+      const ids = matchingTxIds.map((t) => t.id);
+      conditions.push(inArray(transactions.id, ids));
     }
 
     const limitNum = Number(limit) || 20;

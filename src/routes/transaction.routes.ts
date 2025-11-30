@@ -58,7 +58,7 @@ router.get("/recent", getRecentTransactions);
  *       201:
  *         description: Transaction created
  */
-router.post("/", createTransaction);
+router.post("/", upload.single("image"), createTransaction);
 
 /**
  * @swagger
