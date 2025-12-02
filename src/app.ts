@@ -9,6 +9,7 @@ import transactionRoutes from "./routes/transaction.routes";
 import categoryRoutes from "./routes/category.routes";
 import statsRoutes from "./routes/stats.routes";
 import familyRoutes from "./routes/family.routes";
+import ocrRoutes from "./routes/ocr.routes";
 
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
@@ -67,6 +68,7 @@ const createApp = (): Application => {
   app.use("/api/categories", categoryRoutes);
   app.use("/api/stats", statsRoutes);
   app.use("/api/families", familyRoutes);
+  app.use("/api/ocr", ocrRoutes);
 
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     console.error(err);

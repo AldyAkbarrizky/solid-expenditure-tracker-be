@@ -60,6 +60,15 @@ export class FamilyService {
   }
 
   async getFamilyMembers(familyId: number) {
+    const [family] = await db
+      .select()
+      .from(families)
+      .where(eq(families.id, familyId));
+
+    if (!family) {
+      throw new AppError("Family not found", 404);
+    }
+
     const members = await db
       .select({
         id: users.id,
@@ -72,7 +81,15 @@ export class FamilyService {
       .leftJoin(families, eq(users.familyId, families.id))
       .where(eq(users.familyId, familyId));
 
-    return members;
+    return {
+      family: {
+        id: family.id,
+        name: family.name,
+        inviteCode: family.inviteCode,
+        adminId: family.adminId,
+      },
+      members,
+    };
   }
 
   async updateFamilyProfile(

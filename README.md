@@ -9,6 +9,8 @@ Backend berkinerja tinggi ("Dahsyat") untuk aplikasi pencatat pengeluaran keluar
 * **Dashboard Analytics:** Endpoint khusus untuk grafik pengeluaran bulanan, harian, dan per kategori.
 * **Secure Auth:** Sistem login aman dengan Argon2 Hashing & JWT Token.
 * **Global Categories:** Manajemen kategori yang tersentralisasi dan dinamis.
+* **Global Discounts:** Dukungan untuk diskon level transaksi (Global Discounts).
+* **Localization Support:** Struktur data yang mendukung lokalisasi frontend.
 * **High Performance:** Database query yang dioptimasi untuk Shared Hosting (MariaDB/MySQL) menggunakan Drizzle ORM.
 
 ## 🛠 Tech Stack (State of the Art 2025)

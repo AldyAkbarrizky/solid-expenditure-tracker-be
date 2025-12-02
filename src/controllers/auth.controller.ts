@@ -54,6 +54,9 @@ export const updateProfile = async (
     });
     const { name } = schema.parse(req.body);
 
+    console.log("Update Profile Request - Body:", req.body);
+    console.log("Update Profile Request - File:", req.file);
+
     const updatedUser = await userService.updateProfile(
       req.user!.id,
       { name },

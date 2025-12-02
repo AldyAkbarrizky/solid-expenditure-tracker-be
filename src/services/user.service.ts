@@ -13,8 +13,12 @@ export class UserService {
     }
 
     if (file) {
-      const uploadResult = await uploadToCloudinary(file.buffer, "avatars");
-      updateData.avatarUrl = uploadResult.secure_url;
+      console.log("Uploading file to Cloudinary...");
+      const { secure_url } = await uploadToCloudinary(file.buffer, "avatars");
+      console.log("Cloudinary Upload Success:", secure_url);
+      updateData.avatarUrl = secure_url;
+    } else {
+      console.log("No file provided to service.");
     }
 
     if (Object.keys(updateData).length === 0) {

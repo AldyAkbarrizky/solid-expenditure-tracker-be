@@ -4,6 +4,9 @@ import {
   createTransaction,
   getTransactions,
   getRecentTransactions,
+  getTransactionById,
+  deleteTransaction,
+  updateTransaction,
 } from "../controllers/transaction.controller";
 import { protect } from "../middlewares/auth.middleware";
 
@@ -92,5 +95,72 @@ router.post("/", upload.single("image"), createTransaction);
  *         description: List of transactions
  */
 router.get("/", getTransactions);
+
+/**
+ * @swagger
+ * /api/transactions/{id}:
+ *   get:
+ *     summary: Get transaction by ID
+ *     tags: [Transactions]
+ *     security: 
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Transaction details
+ *       404:
+ *         description: Transaction not found
+ */
+router.get("/:id", getTransactionById);
+
+/**
+ * @swagger
+ * /api/transactions/{id}:
+ *   delete:
+ *     summary: Delete transaction by ID
+ *     tags: [Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Transaction deleted
+ */
+router.delete("/:id", deleteTransaction);
+
+/**
+ * @swagger
+ * /api/transactions/{id}:
+ *   put:
+ *     summary: Update transaction by ID
+ *     tags: [Transactions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Transaction updated
+ */
+router.put("/:id", updateTransaction);
 
 export default router;

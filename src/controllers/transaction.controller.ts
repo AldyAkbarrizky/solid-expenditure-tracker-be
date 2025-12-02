@@ -51,7 +51,7 @@ export const getTransactions = async (
   next: NextFunction,
 ) => {
   try {
-    const { startDate, endDate, limit, family } = req.query;
+    const { startDate, endDate, limit, family, filterUserId } = req.query;
 
     const result = await transactionService.getTransactions(req.user!.id, {
       startDate: startDate as string,
@@ -60,6 +60,7 @@ export const getTransactions = async (
       familyId: family === "true" ? req.user!.familyId || undefined : undefined,
       itemName: req.query.itemName as string,
       categoryId: req.query.categoryId ? Number(req.query.categoryId) : undefined,
+      filterUserId: filterUserId ? Number(filterUserId) : undefined,
     });
 
     res.status(200).json({
@@ -84,6 +85,96 @@ export const getRecentTransactions = async (
     res.status(200).json({
       status: "success",
       data: result.data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getTransactionById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const transaction = await transactionService.getTransactionById(
+      Number(id),
+      req.user!.id,
+      req.user!.familyId || undefined
+    );
+
+    if (!transaction) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Transaction not found or access denied",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: transaction,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteTransaction = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    await transactionService.deleteTransaction(Number(id), req.user!.id);
+
+    res.status(200).json({
+      status: "success",
+      message: "Transaction deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateTransaction = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    let bodyData = req.body;
+
+    // Handle stringified items if coming from multipart/form-data (though update might be JSON)
+    if (typeof req.body.items === "string") {
+      bodyData = { ...req.body, items: JSON.parse(req.body.items) };
+    }
+
+    if (bodyData.totalAmount)
+      bodyData.totalAmount = Number(bodyData.totalAmount);
+    if (bodyData.items) {
+      bodyData.items = bodyData.items.map((i: any) => ({
+        ...i,
+        price: Number(i.price),
+        qty: Number(i.qty),
+        categoryId: i.categoryId ? Number(i.categoryId) : null,
+      }));
+    }
+
+    // Validate body
+    const { body } = transactionSchema.parse({ body: bodyData });
+
+    const updatedTransaction = await transactionService.updateTransaction(
+      Number(id),
+      req.user!.id,
+      body
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "Transaction updated successfully",
+      data: updatedTransaction,
     });
   } catch (error) {
     next(error);

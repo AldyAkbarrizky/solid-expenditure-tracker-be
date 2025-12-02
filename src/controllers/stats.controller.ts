@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { db } from "../db";
-import { transactions, transactionItems, categories } from "../db/schema";
-import { eq, and, sql, gte, lte } from "drizzle-orm";
+import { transactions, transactionItems, categories, users } from "../db/schema";
+import { eq, and, sql, gte, lte, inArray } from "drizzle-orm";
 
 export const getDashboardStats = async (
   req: Request,
@@ -10,6 +10,7 @@ export const getDashboardStats = async (
 ) => {
   try {
     const userId = req.user!.id;
+    const { family } = req.query;
     const now = new Date();
 
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -22,18 +23,29 @@ export const getDashboardStats = async (
       59,
     );
 
+    const conditions = [
+      gte(transactions.transactionDate, startOfMonth),
+      lte(transactions.transactionDate, endOfMonth),
+    ];
+
+    if (family === "true" && req.user!.familyId) {
+      const familyMembers = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.familyId, req.user!.familyId));
+      
+      const memberIds = familyMembers.map((m) => m.id);
+      conditions.push(inArray(transactions.userId, memberIds));
+    } else {
+      conditions.push(eq(transactions.userId, userId));
+    }
+
     const [monthlyTotal] = await db
       .select({
         total: sql<number>`sum(${transactions.totalAmount})`.mapWith(Number),
       })
       .from(transactions)
-      .where(
-        and(
-          eq(transactions.userId, userId),
-          gte(transactions.transactionDate, startOfMonth),
-          lte(transactions.transactionDate, endOfMonth),
-        ),
-      );
+      .where(and(...conditions));
 
     const categoryStats = await db
       .select({
@@ -51,13 +63,7 @@ export const getDashboardStats = async (
         eq(transactionItems.transactionId, transactions.id),
       )
       .leftJoin(categories, eq(transactionItems.categoryId, categories.id))
-      .where(
-        and(
-          eq(transactions.userId, userId),
-          gte(transactions.transactionDate, startOfMonth),
-          lte(transactions.transactionDate, endOfMonth),
-        ),
-      )
+      .where(and(...conditions))
       .groupBy(
         categories.id,
         categories.name,
@@ -74,13 +80,7 @@ export const getDashboardStats = async (
         total: sql<number>`sum(${transactions.totalAmount})`.mapWith(Number),
       })
       .from(transactions)
-      .where(
-        and(
-          eq(transactions.userId, userId),
-          gte(transactions.transactionDate, startOfMonth),
-          lte(transactions.transactionDate, endOfMonth),
-        ),
-      )
+      .where(and(...conditions))
       .groupBy(sql`DATE_FORMAT(${transactions.transactionDate}, '%Y-%m-%d')`)
       .orderBy(sql`DATE_FORMAT(${transactions.transactionDate}, '%Y-%m-%d')`);
 

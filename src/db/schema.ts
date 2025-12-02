@@ -84,8 +84,33 @@ export const transactionItems = mysqlTable("transaction_items", {
   }),
 
   name: varchar("name", { length: 255 }).notNull(),
-  price: decimal("price", { precision: 15, scale: 2 }).notNull(),
+  price: decimal("price", { precision: 15, scale: 2 }).notNull(), // Final price after discount
   qty: int("qty").default(1),
+  
+  // Discount fields
+  basePrice: decimal("base_price", { precision: 15, scale: 2 }), // Original price before discount
+  discountType: mysqlEnum("discount_type", ["PERCENT", "NOMINAL"]),
+  discountValue: decimal("discount_value", { precision: 15, scale: 2 }), // The raw value (e.g. 10 for 10%, or 5000 for Rp 5000)
+});
+
+export const transactionFees = mysqlTable("transaction_fees", {
+  id: int("id").autoincrement().primaryKey(),
+  transactionId: int("transaction_id")
+    .notNull()
+    .references(() => transactions.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+});
+
+export const transactionDiscounts = mysqlTable("transaction_discounts", {
+  id: int("id").autoincrement().primaryKey(),
+  transactionId: int("transaction_id")
+    .notNull()
+    .references(() => transactions.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(), // Calculated amount
+  type: mysqlEnum("type", ["PERCENT", "NOMINAL"]).notNull(),
+  value: decimal("value", { precision: 15, scale: 2 }).notNull(), // Raw value (e.g. 10 or 5000)
 });
 
 export const familiesRelations = relations(families, ({ one, many }) => ({
@@ -116,6 +141,8 @@ export const transactionsRelations = relations(
       references: [users.id],
     }),
     items: many(transactionItems),
+    fees: many(transactionFees),
+    discounts: many(transactionDiscounts),
   }),
 );
 
@@ -133,8 +160,28 @@ export const transactionItemsRelations = relations(
   }),
 );
 
+export const transactionFeesRelations = relations(transactionFees, ({ one }) => ({
+  transaction: one(transactions, {
+    fields: [transactionFees.transactionId],
+    references: [transactions.id],
+  }),
+}));
+
+export const transactionDiscountsRelations = relations(transactionDiscounts, ({ one }) => ({
+  transaction: one(transactions, {
+    fields: [transactionDiscounts.transactionId],
+    references: [transactions.id],
+  }),
+}));
+
 export type User = typeof users.$inferSelect;
 export type Family = typeof families.$inferSelect;
 export type Category = typeof categories.$inferSelect;
-export type Transaction = typeof transactions.$inferSelect;
+export type Transaction = typeof transactions.$inferSelect & {
+  items?: TransactionItem[];
+  fees?: TransactionFee[];
+  discounts?: TransactionDiscount[];
+};
 export type TransactionItem = typeof transactionItems.$inferSelect;
+export type TransactionFee = typeof transactionFees.$inferSelect;
+export type TransactionDiscount = typeof transactionDiscounts.$inferSelect;

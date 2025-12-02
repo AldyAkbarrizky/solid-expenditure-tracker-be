@@ -17,9 +17,24 @@ export const loginSchema = z.object({
 
 const transactionItemSchema = z.object({
   name: z.string().min(1),
-  price: z.number().nonnegative(),
-  qty: z.number().int().positive().default(1),
+  price: z.number(), // Allow negative for legacy support or manual adjustments
+  qty: z.number().default(1),
   categoryId: z.number().int().optional().nullable(),
+  basePrice: z.number().optional().nullable(),
+  discountType: z.enum(["PERCENT", "NOMINAL"]).optional().nullable(),
+  discountValue: z.number().optional().nullable(),
+});
+
+const feeSchema = z.object({
+  name: z.string().min(1),
+  amount: z.number(),
+});
+
+const discountSchema = z.object({
+  name: z.string().min(1),
+  amount: z.number(),
+  type: z.enum(["PERCENT", "NOMINAL"]),
+  value: z.number(),
 });
 
 export const transactionSchema = z.object({
@@ -29,6 +44,8 @@ export const transactionSchema = z.object({
     imageUrl: z.url().optional().nullable(),
     rawOcrText: z.string().optional().nullable(),
     items: z.array(transactionItemSchema).optional(),
+    fees: z.array(feeSchema).optional(),
+    discounts: z.array(discountSchema).optional(),
   }),
 });
 
