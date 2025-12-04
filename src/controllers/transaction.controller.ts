@@ -21,6 +21,9 @@ export const createTransaction = async (
     if (typeof req.body.fees === "string") {
       bodyData = { ...bodyData, fees: JSON.parse(req.body.fees) };
     }
+    if (typeof req.body.discounts === "string") {
+      bodyData = { ...bodyData, discounts: JSON.parse(req.body.discounts) };
+    }
 
     if (bodyData.totalAmount)
       bodyData.totalAmount = Number(bodyData.totalAmount);
@@ -43,6 +46,13 @@ export const createTransaction = async (
       bodyData.fees = bodyData.fees.map((f: any) => ({
         ...f,
         amount: Number(f.amount),
+      }));
+    }
+    if (bodyData.discounts) {
+      bodyData.discounts = bodyData.discounts.map((d: any) => ({
+        ...d,
+        amount: Number(d.amount),
+        value: Number(d.value),
       }));
     }
 
@@ -169,6 +179,15 @@ export const updateTransaction = async (
     if (typeof req.body.items === "string") {
       bodyData = { ...req.body, items: JSON.parse(req.body.items) };
     }
+    if (typeof req.body.taxes === "string") {
+      bodyData = { ...bodyData, taxes: JSON.parse(req.body.taxes) };
+    }
+    if (typeof req.body.fees === "string") {
+      bodyData = { ...bodyData, fees: JSON.parse(req.body.fees) };
+    }
+    if (typeof req.body.discounts === "string") {
+      bodyData = { ...bodyData, discounts: JSON.parse(req.body.discounts) };
+    }
 
     if (bodyData.totalAmount)
       bodyData.totalAmount = Number(bodyData.totalAmount);
@@ -178,6 +197,26 @@ export const updateTransaction = async (
         price: Number(i.price),
         qty: Number(i.qty),
         categoryId: i.categoryId ? Number(i.categoryId) : null,
+      }));
+    }
+    if (bodyData.taxes) {
+      bodyData.taxes = bodyData.taxes.map((t: any) => ({
+        ...t,
+        amount: Number(t.amount),
+        value: Number(t.value),
+      }));
+    }
+    if (bodyData.fees) {
+      bodyData.fees = bodyData.fees.map((f: any) => ({
+        ...f,
+        amount: Number(f.amount),
+      }));
+    }
+    if (bodyData.discounts) {
+      bodyData.discounts = bodyData.discounts.map((d: any) => ({
+        ...d,
+        amount: Number(d.amount),
+        value: Number(d.value),
       }));
     }
 
