@@ -85,7 +85,8 @@ export const transactionItems = mysqlTable("transaction_items", {
 
   name: varchar("name", { length: 255 }).notNull(),
   price: decimal("price", { precision: 15, scale: 2 }).notNull(), // Final price after discount
-  qty: int("qty").default(1),
+  qty: decimal("qty", { precision: 15, scale: 2 }).default("1"),
+  unit: varchar("unit", { length: 20 }).default("pcs"),
   
   // Discount fields
   basePrice: decimal("base_price", { precision: 15, scale: 2 }), // Original price before discount
@@ -100,6 +101,17 @@ export const transactionFees = mysqlTable("transaction_fees", {
     .references(() => transactions.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
   amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+});
+
+export const transactionTaxes = mysqlTable("transaction_taxes", {
+  id: int("id").autoincrement().primaryKey(),
+  transactionId: int("transaction_id")
+    .notNull()
+    .references(() => transactions.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  type: mysqlEnum("type", ["PERCENT", "NOMINAL"]).notNull(),
+  value: decimal("value", { precision: 15, scale: 2 }).notNull(),
 });
 
 export const transactionDiscounts = mysqlTable("transaction_discounts", {
@@ -142,6 +154,7 @@ export const transactionsRelations = relations(
     }),
     items: many(transactionItems),
     fees: many(transactionFees),
+    taxes: many(transactionTaxes),
     discounts: many(transactionDiscounts),
   }),
 );
@@ -174,14 +187,23 @@ export const transactionDiscountsRelations = relations(transactionDiscounts, ({ 
   }),
 }));
 
+export const transactionTaxesRelations = relations(transactionTaxes, ({ one }) => ({
+  transaction: one(transactions, {
+    fields: [transactionTaxes.transactionId],
+    references: [transactions.id],
+  }),
+}));
+
 export type User = typeof users.$inferSelect;
 export type Family = typeof families.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect & {
   items?: TransactionItem[];
   fees?: TransactionFee[];
+  taxes?: TransactionTax[];
   discounts?: TransactionDiscount[];
 };
 export type TransactionItem = typeof transactionItems.$inferSelect;
 export type TransactionFee = typeof transactionFees.$inferSelect;
+export type TransactionTax = typeof transactionTaxes.$inferSelect;
 export type TransactionDiscount = typeof transactionDiscounts.$inferSelect;

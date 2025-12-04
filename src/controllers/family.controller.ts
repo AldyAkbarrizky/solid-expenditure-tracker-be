@@ -101,3 +101,32 @@ export const updateFamilyProfile = async (
     next(error);
   }
 };
+
+export const kickMember = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user!.familyId) {
+      return res.status(400).json({
+        status: "fail",
+        message: "User is not in a family",
+      });
+    }
+
+    const { userId } = req.params;
+    await familyService.kickMember(
+      req.user!.id,
+      req.user!.familyId,
+      Number(userId),
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "Member kicked successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

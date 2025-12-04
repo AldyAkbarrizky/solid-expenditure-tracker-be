@@ -87,6 +87,7 @@ export class FamilyService {
         name: family.name,
         inviteCode: family.inviteCode,
         adminId: family.adminId,
+        avatarUrl: family.avatarUrl,
       },
       members,
     };
@@ -134,5 +135,43 @@ export class FamilyService {
       .where(eq(families.id, familyId));
 
     return updatedFamily;
+  }
+  async kickMember(adminId: number, familyId: number, targetUserId: number) {
+    const [family] = await db
+      .select()
+      .from(families)
+      .where(eq(families.id, familyId));
+
+    if (!family) {
+      throw new AppError("Family not found", 404);
+    }
+
+    if (family.adminId !== adminId) {
+      throw new AppError("Only admin can kick members", 403);
+    }
+
+    if (family.adminId === targetUserId) {
+      throw new AppError("Admin cannot kick themselves", 400);
+    }
+
+    const [targetUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, targetUserId));
+
+    if (!targetUser) {
+      throw new AppError("User not found", 404);
+    }
+
+    if (targetUser.familyId !== familyId) {
+      throw new AppError("User is not in this family", 400);
+    }
+
+    await db
+      .update(users)
+      .set({ familyId: null })
+      .where(eq(users.id, targetUserId));
+
+    return true;
   }
 }

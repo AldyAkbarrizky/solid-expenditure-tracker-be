@@ -1,6 +1,6 @@
 import { eq, desc, and, gte, lte, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
-import { transactions, transactionItems, transactionFees, transactionDiscounts, categories, users } from "../db/schema";
+import { transactions, transactionItems, transactionFees, transactionDiscounts, transactionTaxes, categories, users } from "../db/schema";
 import { uploadToCloudinary } from "../utils/cloudinary";
 import { TransactionInput } from "../utils/validation";
 
@@ -26,7 +26,7 @@ export class TransactionService {
           type: data.type,
           imageUrl: imageUrl,
           rawOcrText: data.rawOcrText,
-          transactionDate: new Date(),
+          transactionDate: data.transactionDate ? new Date(data.transactionDate) : new Date(),
         })
         .$returningId();
 
@@ -36,6 +36,7 @@ export class TransactionService {
           name: item.name,
           price: item.price.toString(),
           qty: item.qty,
+          unit: item.unit || "pcs",
           categoryId: item.categoryId || null,
           basePrice: item.basePrice ? item.basePrice.toString() : null,
           discountType: item.discountType || null,
@@ -51,6 +52,17 @@ export class TransactionService {
           amount: fee.amount.toString(),
         }));
         await tx.insert(transactionFees).values(feesToInsert);
+      }
+
+      if (data.taxes && data.taxes.length > 0) {
+        const taxesToInsert = data.taxes.map((tax: any) => ({
+          transactionId: newTx.id,
+          name: tax.name,
+          amount: tax.amount.toString(),
+          type: tax.type,
+          value: tax.value.toString(),
+        }));
+        await tx.insert(transactionTaxes).values(taxesToInsert);
       }
 
       if (data.discounts && data.discounts.length > 0) {
@@ -325,6 +337,8 @@ export class TransactionService {
         .set({
           totalAmount: data.totalAmount.toString(),
           rawOcrText: data.rawOcrText,
+          type: data.type,
+          transactionDate: data.transactionDate ? new Date(data.transactionDate) : undefined,
           // We don't update imageUrl here usually, unless re-upload logic is added
         })
         .where(eq(transactions.id, transactionId));
@@ -332,6 +346,7 @@ export class TransactionService {
       // Update items: Strategy -> Delete all and re-insert
       await tx.delete(transactionItems).where(eq(transactionItems.transactionId, transactionId));
       await tx.delete(transactionFees).where(eq(transactionFees.transactionId, transactionId));
+      await tx.delete(transactionTaxes).where(eq(transactionTaxes.transactionId, transactionId));
       await tx.delete(transactionDiscounts).where(eq(transactionDiscounts.transactionId, transactionId));
 
       if (data.items && data.items.length > 0) {
@@ -340,6 +355,7 @@ export class TransactionService {
           name: item.name,
           price: item.price.toString(),
           qty: item.qty,
+          unit: item.unit || "pcs",
           categoryId: item.categoryId || null,
           basePrice: item.basePrice ? item.basePrice.toString() : null,
           discountType: item.discountType || null,
@@ -355,6 +371,17 @@ export class TransactionService {
           amount: fee.amount.toString(),
         }));
         await tx.insert(transactionFees).values(feesToInsert);
+      }
+
+      if (data.taxes && data.taxes.length > 0) {
+        const taxesToInsert = data.taxes.map((tax: any) => ({
+          transactionId: transactionId,
+          name: tax.name,
+          amount: tax.amount.toString(),
+          type: tax.type,
+          value: tax.value.toString(),
+        }));
+        await tx.insert(transactionTaxes).values(taxesToInsert);
       }
 
       if (data.discounts && data.discounts.length > 0) {

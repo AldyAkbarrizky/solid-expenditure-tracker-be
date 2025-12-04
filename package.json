@@ -1,6 +1,6 @@
 {
   "name": "solid-expenditure-tracker-be",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Aplikasi Backend untuk Solid Expenditure Tracker",
   "keywords": [
     "nodejs",

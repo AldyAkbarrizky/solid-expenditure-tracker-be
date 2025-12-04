@@ -5,6 +5,7 @@ import {
   joinFamily,
   getFamilyMembers,
   updateFamilyProfile,
+  kickMember,
 } from "../controllers/family.controller";
 import multer from "multer";
 
@@ -60,5 +61,6 @@ router.post("/", createFamily);
 router.post("/join", joinFamily);
 router.get("/members", getFamilyMembers);
 router.put("/profile", upload.single("avatar"), updateFamilyProfile);
+router.delete("/members/:userId", kickMember);
 
 export default router;
